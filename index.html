@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harvest Hacker Welcome</title>
+<style>
+  *{margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif;}
+
+  body { height:100vh; width:100%; position:relative; overflow:hidden; }
+
+  /* ========== WELCOME PAGE ========== */
+  #welcomePage{
+    height:100%; width:100%;
+    display:flex; align-items:center; justify-content:center;
+    background:url("https://images.unsplash.com/photo-1473445361085-b9a07f55608b") no-repeat center center/cover;
+    position:absolute; top:0; left:0; z-index:10;
+  }
+  #welcomePage::before{
+    content:""; position:absolute; top:0; left:0; width:100%; height:100%;
+    background:linear-gradient(45deg, rgba(0,0,0,0.6), rgba(0,50,0,0.6));
+    z-index:1; animation: gradientShift 8s infinite alternate;
+  }
+  @keyframes gradientShift{
+    from { background:linear-gradient(45deg, rgba(0,0,0,0.6), rgba(0,80,0,0.6)); }
+    to { background:linear-gradient(45deg, rgba(0,0,50,0.6), rgba(0,120,0,0.6)); }
+  }
+  .sparkle{ position:absolute; width:4px; height:4px; background:white; border-radius:50%; opacity:0.8; animation:sparkleFall 6s linear infinite; }
+  @keyframes sparkleFall{
+    0%{ transform:translateY(-10px) scale(0.5); opacity:0.8; }
+    50%{ opacity:1; }
+    100%{ transform:translateY(100vh) scale(1); opacity:0; }
+  }
+  .welcome-container{ position:relative; z-index:2; text-align:center; color:#fff; animation:fadeIn 2s ease forwards; }
+  .welcome-container h1{ font-size:3.5rem; font-weight:700; text-shadow:0 0 15px #00ff7f,0 0 30px #28a745; margin-bottom:15px; }
+  .welcome-container h2{ font-size:1.5rem; color:#FFD700; animation:typing 5s steps(40,end) infinite alternate; white-space:nowrap; overflow:hidden; border-right:3px solid #FFD700; display:inline-block; }
+  @keyframes typing{ from{width:0} to{width:100%} }
+  @keyframes fadeIn{ from{opacity:0; transform:scale(0.9);} to{opacity:1; transform:scale(1);} }
+
+  @media(max-width:768px){
+    .welcome-container h1{ font-size:2rem; }
+    .welcome-container h2{ font-size:1rem; }
+  }
+
+  /* ========== LANGUAGE PAGE ========== */
+  #languagePage{ display:none; height:100%; width:100%; position:absolute; top:0; left:0; }
+  .overlay{ position:absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,50,0,0.55); z-index:1; }
+  .floating-crops{ position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; overflow:hidden; }
+  .floating-crops::before,
+  .floating-crops::after{ content:"🌿"; position:absolute; font-size:2rem; animation:floatDown 10s linear infinite; opacity:0.7; }
+  .floating-crops::before{ left:20%; animation-delay:0s; }
+  .floating-crops::after{ left:70%; animation-delay:5s; }
+  @keyframes floatDown{ 0%{ top:-10%; transform: rotate(0deg) scale(1); } 100%{ top:110%; transform: rotate(360deg) scale(1.2); } }
+
+  .card{
+    position: relative; z-index:2;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    padding:2rem; border-radius:20px;
+    width:90%; max-width:400px;
+    text-align:center;
+    box-shadow:0 8px 30px rgba(0,0,0,0.3);
+    animation:fadeIn 1s ease-in-out;
+    transition:0.4s;
+    margin:auto; top:50%; transform:translateY(-50%); /* vertical center fix */
+  }
+  .card:hover{ box-shadow:0 0 20px rgba(255,255,255,0.6); }
+  .card h1{ color:#fff; font-size:1.8rem; margin-bottom:1rem; text-shadow:0 0 10px rgba(255,255,255,0.8); }
+  .card input{ width:100%; padding:10px; border-radius:8px; border:none; margin-bottom:1rem; font-size:1rem; }
+  .languages{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px; }
+  .languages button{
+    padding:10px; border:none; border-radius:10px;
+    background:linear-gradient(135deg,#4CAF50,#3e8e41);
+    color:#fff; font-size:1rem; cursor:pointer; transition:0.3s; position:relative; overflow:hidden;
+  }
+  .languages button::after{
+    content:""; position:absolute; top:0; left:-100%; width:100%; height:100%;
+    background: rgba(255,255,255,0.3); transform: skewX(-20deg); transition:0.5s;
+  }
+  .languages button:hover::after{ left:100%; }
+  .languages button:hover{ transform:scale(1.05); }
+  .languages button:active{ transform:scale(0.95); box-shadow:0 0 15px yellow; }
+
+  #getStartedBtn{
+    margin-top:15px; padding:12px 25px; font-size:1.1rem; border:none; border-radius:10px;
+    background:#FFD700; cursor:pointer; transition:0.3s; position:relative; z-index:3; width:100%;
+  }
+  #getStartedBtn:hover{ transform:scale(1.05); background:#FFC107; }
+
+  @media(max-width:480px){
+    .card{ padding:1.5rem; width:95%; }
+    .card h1{ font-size:1.5rem; }
+    .languages button{ font-size:0.9rem; padding:8px; }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- WELCOME PAGE -->
+<div id="welcomePage">
+  <div class="welcome-container">
+    <h1>🌱 Welcome to Harvest Hacker 🌱</h1>
+    <h2>Empowering Farmers with Smart Solutions...</h2>
+  </div>
+</div>
+
+<!-- LANGUAGE PAGE -->
+<div id="languagePage">
+  <div class="overlay"></div>
+  <div class="floating-crops"></div>
+  <div class="card">
+    <h1 id="title">Select Your Language</h1>
+    <input type="text" id="searchLang" placeholder="Search language..." onkeyup="filterLanguages()">
+    <div class="languages" id="languageList">
+      <button onclick="setLanguage('en')">🇬🇧 English</button>
+      <button onclick="setLanguage('hi')">🇮🇳 हिन्दी</button>
+      <button onclick="setLanguage('mr')">🇮🇳 मराठी</button>
+      <button onclick="setLanguage('ta')">🇮🇳 தமிழ்</button>
+      <button onclick="setLanguage('bn')">🇧🇩 বাংলা</button>
+      <button onclick="setLanguage('te')">🇮🇳 తెలుగు</button>
+    </div>
+    <button id="getStartedBtn" onclick="startApp()">🌱 Get Started</button>
+  </div>
+  <audio id="welcomeAudio"></audio>
+</div>
+
+<script>
+  // Sparkles
+  for(let i=0;i<25;i++){
+    let s=document.createElement("div");
+    s.className="sparkle";
+    s.style.left=Math.random()*100+"vw";
+    s.style.animationDuration=(4+Math.random()*4)+"s";
+    document.body.appendChild(s);
+  }
+
+  // Show language page after 10s
+  setTimeout(()=>{
+    document.getElementById("welcomePage").style.display="none";
+    document.getElementById("languagePage").style.display="block";
+  },10000);
+
+  // LANGUAGE PAGE JS
+  const translations={
+    en:{title:"Select Your Language",keywords:["english","eng"]},
+    hi:{title:"अपनी भाषा चुनें",keywords:["hindi","हिन्दी","हिंदी"]},
+    mr:{title:"आपली भाषा निवडा",keywords:["marathi","मराठी"]},
+    ta:{title:"உங்கள் மொழியைத் தேர்ந்தெடுக்கவும்",keywords:["tamil","தமிழ்"]},
+    bn:{title:"আপনার ভাষা নির্বাচন করুন",keywords:["bengali","বাংলা"]},
+    te:{title:"మీ భాషను ఎంచుకోండి",keywords:["telugu","తెలుగు"]}
+  };
+
+  const audioFiles={
+    en:"audio/welcome_en.mp3",
+    hi:"audio/welcome_hi.mp3",
+    mr:"audio/welcome_mr.mp3",
+    ta:"audio/welcome_ta.mp3",
+    bn:"audio/welcome_bn.mp3",
+    te:"audio/welcome_te.mp3"
+  };
+
+  function setLanguage(lang){
+    localStorage.setItem("appLanguage",lang);
+    document.getElementById("title").textContent=translations[lang].title;
+    const audio=document.getElementById("welcomeAudio");
+    if(audioFiles[lang]){audio.src=audioFiles[lang]; audio.play();}
+    const card=document.querySelector(".card");
+    card.classList.add("animate-out");
+    setTimeout(()=>card.classList.remove("animate-out"),800);
+  }
+
+  function filterLanguages(){
+    const input=document.getElementById("searchLang").value.toLowerCase();
+    const buttons=document.getElementById("languageList").getElementsByTagName("button");
+    for(let i=0;i<buttons.length;i++){
+      const langCode=Object.keys(translations)[i];
+      const keywords=translations[langCode].keywords;
+      const txtValue=buttons[i].textContent||buttons[i].innerText;
+      const match=txtValue.toLowerCase().includes(input) || keywords.some(k=>k.includes(input));
+      buttons[i].style.display = match?"":"none";
+    }
+  }
+
+  window.addEventListener("DOMContentLoaded",()=>{
+    const savedLang=localStorage.getItem("appLanguage")||"en";
+    setLanguage(savedLang);
+  });
+
+  function startApp(){
+    window.location.href = "HomePage.html";
+    // const lang=localStorage.getItem("appLanguage")||"en";
+    // alert(`Starting app in language: ${lang}`);
+    // Replace alert with your main page URL:
+    // window.location.href="main.html";
+  }
+
+</script>
+
+</body>
+</html>

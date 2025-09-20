@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Farming Complaint Form</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+  body {
+    background: linear-gradient(270deg, #d1fae5, #fef3c7, #bfdbfe);
+    background-size: 600% 600%;
+    animation: gradientBG 15s ease infinite;
+    transition: background 0.8s ease;
+  }
+
+  @keyframes gradientBG {
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+  }
+
+  .animate-fadeInUp {opacity:0; transform:translateY(20px); animation:fadeInUp 0.8s forwards;}
+  .animate-fadeInUp.delay-100{animation-delay:0.1s}
+  .animate-fadeInUp.delay-200{animation-delay:0.2s}
+  .animate-fadeInUp.delay-300{animation-delay:0.3s}
+  .animate-fadeInUp.delay-400{animation-delay:0.4s}
+  .animate-fadeInUp.delay-500{animation-delay:0.5s}
+  .animate-fadeInUp.delay-600{animation-delay:0.6s}
+  .animate-fadeInUp.delay-700{animation-delay:0.7s}
+  .animate-fadeInUp.delay-800{animation-delay:0.8s}
+  @keyframes fadeInUp {to {opacity:1; transform:translateY(0)}}
+
+  /* Form background toggle */
+  .form-light { background-color: white; color: black; }
+  .form-dark { background-color: #1f2937; color: white; }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 transition-colors duration-500">
+
+<div class="w-full max-w-3xl relative">
+  <!-- Form Card -->
+  <div id="formCard" class="form-light rounded-2xl shadow-xl p-8 relative overflow-hidden transform transition duration-500 opacity-0 translate-y-10 text-black ">
+
+    <!-- Dark/Light Mode Toggle inside form -->
+    <div class="flex justify-end mb-4">
+      <button id="formToggleDark" class="px-3 py-1 rounded-xl bg-gray-200 text-gray-800 shadow hover:scale-105 transition">
+        🌙 Dark Mode
+      </button>
+    </div>
+
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-6">
+      <lottie-player src="https://assets6.lottiefiles.com/packages/lf20_jcikwtux.json" background="transparent" speed="1" style="width: 60px; height: 60px;" loop autoplay></lottie-player>
+      <div>
+        <h1 class="text-2xl font-bold">Farming Complaint Form</h1>
+        <p class="text-gray-500 dark:text-gray-400">Apni farming problem ko detail me likhiye.</p>
+      </div>
+    </div>
+
+    <!-- Complaint Form -->
+    <form id="complaintForm" class="space-y-4">
+      <!-- Name & Phone -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="animate-fadeInUp">
+          <label class="block text-sm font-medium">Naam</label>
+          <input type="text" name="name" required class="mt-1 w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white" placeholder="Aapka naam" />
+        </div>
+        <div class="animate-fadeInUp delay-100">
+          <label class="block text-sm font-medium">Phone</label>
+          <input type="text" name="phone" required class="mt-1 w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white" placeholder="+91 XXXXXXXX" />
+        </div>
+      </div>
+
+      <!-- Village/City -->
+      <div class="animate-fadeInUp delay-200">
+        <label class="block text-sm font-medium">Village / City</label>
+        <input type="text" name="village" class="mt-1 w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white" placeholder="Gaon / Sheher" />
+      </div>
+
+      <!-- State & District -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fadeInUp delay-300">
+        <div>
+          <label class="block text-sm font-medium">State</label>
+          <select id="stateSelect" name="state" class="mt-1 w-full border rounded-xl px-3 py-2 dark:bg-gray-800 dark:text-white">
+            <option value="">-- Select State --</option>
+            <option>Uttar Pradesh</option>
+            <option>Bihar</option>
+            <option>Maharashtra</option>
+            <option>Punjab</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium">District</label>
+          <select id="districtSelect" name="district" class="mt-1 w-full border rounded-xl px-3 py-2 dark:bg-gray-800 dark:text-white">
+            <option value="">-- Select District --</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="animate-fadeInUp delay-400">
+        <label class="block text-sm font-medium">Location (Auto Detect)</label>
+        <div class="flex gap-2">
+          <input type="text" id="locationField" name="location" readonly class="mt-1 flex-1 border rounded-xl px-3 py-2 dark:bg-gray-800 dark:text-white" placeholder="Click button to get location" />
+          <button type="button" id="getLocation" class="mt-1 px-3 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700">📍 Get</button>
+        </div>
+      </div>
+
+      <!-- Crop -->
+      <div class="animate-fadeInUp delay-500">
+        <label class="block text-sm font-medium">Crop</label>
+        <input type="text" name="crop" class="mt-1 w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white" placeholder="Wheat, Rice..." />
+      </div>
+
+      <!-- Issue Type -->
+      <div class="animate-fadeInUp delay-600">
+        <label class="block text-sm font-medium">Issue Type</label>
+        <select name="issueType" class="mt-1 w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white">
+          <option value="pest">Pest</option>
+          <option value="water">Water</option>
+          <option value="input">Input</option>
+          <option value="market">Market</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
+      <!-- Description -->
+      <div class="animate-fadeInUp delay-700">
+        <label class="block text-sm font-medium">Description</label>
+        <textarea name="description" required class="mt-1 w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white" placeholder="Problem ko detail me likhiye..."></textarea>
+      </div>
+
+      <!-- File Upload -->
+      <div class="animate-fadeInUp delay-800">
+        <label class="block text-sm font-medium">Upload File (Optional)</label>
+        <input type="file" name="attachment" accept=".jpg,.png,.jpeg,.pdf" class="mt-1 w-full border rounded-xl px-3 py-2 focus:ring-2 focus:ring-blue-500 cursor-pointer dark:bg-gray-800 dark:text-white" />
+        <p class="text-xs text-gray-500 dark:text-gray-300 mt-1">You can upload images or PDF files.</p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex justify-end gap-3 pt-4 animate-fadeInUp delay-900">
+        <button type="reset" class="px-4 py-2 rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300 transition dark:bg-gray-700 dark:text-gray-100">Clear</button>
+        <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-xl transition transform hover:-translate-y-0.5">Submit</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Success Animation Card -->
+  <div id="successCard" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-white dark:bg-gray-900 rounded-2xl shadow-xl text-center p-8">
+    <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_jbrw3hcz.json" background="transparent" speed="1" style="width:150px; height:150px;" autoplay></lottie-player>
+    <h2 class="text-xl font-bold mt-4 text-green-600">Complaint Submitted!</h2>
+    <p id="complaintId" class="mt-2 text-sm text-gray-600 dark:text-gray-300"></p>
+  </div>
+</div>
+
+<script>
+const form=document.getElementById('complaintForm');
+const formCard=document.getElementById('formCard');
+const successCard=document.getElementById('successCard');
+const toggleDark=document.getElementById('formToggleDark');
+const getLocationBtn=document.getElementById('getLocation');
+const locationField=document.getElementById('locationField');
+const complaintId=document.getElementById('complaintId');
+const stateSelect=document.getElementById('stateSelect');
+const districtSelect=document.getElementById('districtSelect');
+
+// Districts
+const districtsData={
+  "Uttar Pradesh":["Lucknow","Varanasi","Kanpur"],
+  "Bihar":["Patna","Gaya","Muzaffarpur"],
+  "Maharashtra":["Mumbai","Pune","Nagpur"],
+  "Punjab":["Amritsar","Ludhiana","Jalandhar"]
+};
+stateSelect.addEventListener('change',()=>{
+  districtSelect.innerHTML='<option value="">-- Select District --</option>';
+  if(districtsData[stateSelect.value]){
+    districtsData[stateSelect.value].forEach(d=>{
+      let opt=document.createElement('option'); opt.text=d; opt.value=d;
+      districtSelect.add(opt);
+    });
+  }
+});
+
+// Animate form entrance
+window.addEventListener('load',()=>{
+  formCard.style.opacity='1';
+  formCard.style.transform='translateY(0)';
+});
+
+// Toggle Form Background Dark/Light
+toggleDark.addEventListener('click',()=>{
+  if(formCard.classList.contains('form-light')){
+    formCard.classList.remove('form-light');
+    formCard.classList.add('form-dark');
+    toggleDark.textContent="☀️ Light Mode";
+  } else {
+    formCard.classList.remove('form-dark');
+    formCard.classList.add('form-light');
+    toggleDark.textContent="🌙 Dark Mode";
+  }
+});
+
+// Location
+getLocationBtn.addEventListener('click',()=>{
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos=>{
+      const {latitude,longitude}=pos.coords;
+      locationField.value=`Lat: ${latitude.toFixed(5)}, Lng: ${longitude.toFixed(5)}`;
+    },()=>{ alert('Location access denied'); });
+  }else{ alert('Geolocation not supported'); }
+});
+
+// Submit
+form.addEventListener('submit',e=>{
+  e.preventDefault();
+  const id="CMP"+Math.floor(Math.random()*90000+10000);
+  complaintId.textContent="Your Complaint ID: "+id;
+
+  formCard.classList.add('opacity-0','translate-y-10','transition');
+  setTimeout(()=>{
+    formCard.classList.add('hidden');
+    successCard.classList.remove('hidden');
+    successCard.classList.add('animate-fadeInUp');
+    confetti({particleCount:200, spread:80, origin:{y:0.6}});
+  },500);
+
+  setTimeout(()=>{
+    form.reset();
+    successCard.classList.add('hidden');
+    formCard.classList.remove('hidden','opacity-0','translate-y-10');
+  },5000);
+});
+</script>
+</body>
+</html>
