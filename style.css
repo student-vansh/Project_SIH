@@ -197,6 +197,9 @@ z-index: 1;
   flex: 1;
   flex-basis: 300px;
 }
+.image-container{
+  margin-left:40px;
+}
 h1 {
   font-size: 5.6vw;
   color: var(--lead);
@@ -888,5 +891,6 @@ input[type="email"]:focus {
           transform: rotate(360deg);
         }
       }
+
 
 
