@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Harvest Hacker - Chatbot</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .chat-container {
+      background: #ffffffcc;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: fadeIn 0.8s ease;
+    }
+    .chat-header {
+      background: #27ae60;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      max-height: 350px;
+      scroll-behavior: smooth;
+    }
+    .message {
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 18px;
+      width: fit-content;
+      max-width: 80%;
+      word-wrap: break-word;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideIn 0.4s forwards;
+    }
+    .user-message {
+      background: #d1f7d1;
+      align-self: flex-end;
+    }
+    .bot-message {
+      background: #f1f1f1;
+      align-self: flex-start;
+    }
+    .chat-input {
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+    }
+    .chat-input input, .chat-input select, .chat-input button {
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    .chat-input button {
+      background: #27ae60;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    .chat-input button:hover {
+      background: #219150;
+    }
+    .mic-btn {
+      background: #ff7675;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      margin-top: 5px;
+      transition: background 0.3s ease;
+    }
+    .mic-btn.recording {
+      background: #d63031;
+      animation: pulse 1s infinite;
+    }
+    .cam-btn {
+      background: #0984e3;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.2rem;
+      margin-top: 5px;
+      transition: background 0.3s ease;
+    }
+    .cam-btn:hover {
+      background: #0769a5;
+    }
+    .chat-messages img, 
+    .chat-messages video, 
+    .chat-messages audio {
+      border-radius: 10px;
+      margin-top: 5px;
+      max-width: 100%;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes slideIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(214,48,49, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(214,48,49, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(214,48,49, 0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">Farm Helper Chatbot</div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input">
+      <select id="languageSelect">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="ur">اردو</option>
+        <option value="pa">ਪੰਜਾਬੀ</option>
+      </select>
+      <input type="text" id="userInput" placeholder="Type your problem..." />
+      <input type="file" id="mediaInput" accept="image/,video/,audio/*" />
+      <button onclick="sendMessage()">Send</button>
+      <button class="mic-btn" id="micBtn" onclick="toggleRecording()">🎤</button>
+      <button class="cam-btn" id="camBtn" onclick="openCamera()">📷</button>
+    </div>
+  </div>
+
+  <script>
+    const chatMessages = document.getElementById('chatMessages');
+    const userInput = document.getElementById('userInput');
+    const mediaInput = document.getElementById('mediaInput');
+    const languageSelect = document.getElementById('languageSelect');
+    const micBtn = document.getElementById('micBtn');
+
+    let mediaRecorder;
+    let audioChunks = [];
+    let cameraStream;
+
+    const translations = {
+      en: {
+        water: "Make sure your irrigation system is working properly. Try drip irrigation.",
+        fertilizer: "Use recommended fertilizers based on soil tests.",
+        pest: "Use neem oil or organic methods for pest control.",
+        default: "Please explain your problem in detail or contact the agriculture office."
+      },
+      hi: {
+        water: "सुनिश्चित करें कि आपकी सिंचाई प्रणाली सही काम कर रही है। ड्रिप सिंचाई आज़माएँ।",
+        fertilizer: "मिट्टी परीक्षण के आधार पर अनुशंसित उर्वरकों का उपयोग करें।",
+        pest: "कीट नियंत्रण के लिए नीम का तेल या जैविक विधियों का उपयोग करें।",
+        default: "कृपया अपनी समस्या विस्तार से बताएं या कृषि कार्यालय से संपर्क करें।"
+      },
+      ur: {
+        water: "یقینی بنائیں کہ آپ کا آبپاشی نظام درست کام کر رہا ہے۔ ڈرپ آبپاشی آزمائیں۔",
+        fertilizer: "مٹی کے تجزیے کی بنیاد پر تجویز کردہ کھاد استعمال کریں۔",
+        pest: "کیڑوں کے کنٹرول کے لیے نیم کا تیل یا قدرتی طریقے استعمال کریں۔",
+        default: "براہ کرم اپنی مسئلہ تفصیل سے بیان کریں یا زرعی دفتر سے رابطہ کریں۔"
+      },
+      pa: {
+        water: "ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਹਾਡੀ ਸਿੰਚਾਈ ਪ੍ਰਣਾਲੀ ਸਹੀ ਕੰਮ ਕਰ ਰਹੀ ਹੈ। ਡਰਿਪ ਸਿੰਚਾਈ ਅਜ਼ਮਾਓ।",
+        fertilizer: "ਮਿੱਟੀ ਜਾਂਚ ਦੇ ਆਧਾਰ 'ਤੇ ਸਿਫ਼ਾਰਸ਼ ਕੀਤੇ ਖਾਦਾਂ ਦੀ ਵਰਤੋਂ ਕਰੋ।",
+        pest: "ਕੀੜਿਆਂ ਦੇ ਨਿਯੰਤਰਣ ਲਈ ਨੀਮ ਦੇ ਤੇਲ ਜਾਂ ਜੈਵਿਕ ਤਰੀਕੇ ਵਰਤੋ।",
+        default: "ਕਿਰਪਾ ਕਰਕੇ ਆਪਣੀ ਸਮੱਸਿਆ ਵਿਸਥਾਰ ਨਾਲ ਦੱਸੋ ਜਾਂ ਖੇਤੀਬਾੜੀ ਦਫ਼ਤਰ ਨਾਲ ਸੰਪਰਕ ਕਰੋ।"
+      }
+    };
+
+    function sendMessage() {
+      const message = userInput.value.trim();
+      const file = mediaInput.files[0];
+      const lang = languageSelect.value;
+
+      if (message === "" && !file) {
+        alert("Please enter a message or upload a file.");
+        return;
+      }
+
+      if (message !== "") {
+        addMessage(message, "user-message");
+      }
+
+      if (file) {
+        const fileType = file.type.split('/')[0];
+        let mediaElement;
+
+        if (fileType === "image") {
+          mediaElement = document.createElement("img");
+          mediaElement.src = URL.createObjectURL(file);
+          addMessage(mediaElement, "user-message");
+
+          setTimeout(() => {
+            addMessage(translations[lang].default, "bot-message");
+          }, 500);
+          return;
+        } 
+        else if (fileType === "video") {
+          mediaElement = document.createElement("video");
+          mediaElement.src = URL.createObjectURL(file);
+          mediaElement.controls = true;
+          addMessage(mediaElement, "user-message");
+
+          setTimeout(() => {
+            addMessage(translations[lang].default, "bot-message");
+          }, 500);
+          return;
+        }
+        else if (fileType === "audio") {
+          mediaElement = document.createElement("audio");
+          mediaElement.src = URL.createObjectURL(file);
+          mediaElement.controls = true;
+          addMessage(mediaElement, "user-message");
+
+          setTimeout(() => {
+            addMessage(translations[lang].default, "bot-message");
+          }, 500);
+          return;
+        }
+      }
+
+      userInput.value = "";
+      mediaInput.value = "";
+
+      setTimeout(() => {
+        const response = getBotResponse(message, lang);
+        addMessage(response, "bot-message");
+      }, 500);
+    }
+
+    function addMessage(textOrElement, className) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = "message " + className;
+      if (typeof textOrElement === "string") {
+        msgDiv.innerText = textOrElement;
+      } else {
+        msgDiv.appendChild(textOrElement);
+      }
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function getBotResponse(message, lang) {
+      message = message.toLowerCase();
+      const dict = translations[lang];
+      for (const keyword in dict) {
+        if (keyword !== "default" && message.includes(keyword)) {
+          return dict[keyword];
+        }
+      }
+      return dict.default;
+    }
+
+    async function toggleRecording() {
+      if (!mediaRecorder || mediaRecorder.state === "inactive") {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.start();
+          micBtn.classList.add("recording");
+          audioChunks = [];
+
+          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            const audioElement = document.createElement("audio");
+            audioElement.src = audioUrl;
+            audioElement.controls = true;
+
+            addMessage(audioElement, "user-message");
+
+            setTimeout(() => {
+              addMessage(translations[languageSelect.value].default, "bot-message");
+            }, 500);
+          };
+        } catch (err) {
+          alert("Mic access denied!");
+        }
+      } else {
+        mediaRecorder.stop();
+        micBtn.classList.remove("recording");
+      }
+    }
+
+    function openCamera() {
+      const video = document.createElement("video");
+      video.autoplay = true;
+      video.style.width = "100%";
+      video.style.borderRadius = "10px";
+
+      const captureBtn = document.createElement("button");
+      captureBtn.innerText = "📸 Capture";
+      captureBtn.style.marginTop = "10px";
+      captureBtn.style.padding = "8px 12px";
+      captureBtn.style.border = "none";
+      captureBtn.style.background = "#27ae60";
+      captureBtn.style.color = "white";
+      captureBtn.style.borderRadius = "8px";
+      captureBtn.style.cursor = "pointer";
+
+      const previewDiv = document.createElement("div");
+      previewDiv.style.position = "fixed";
+      previewDiv.style.top = "50%";
+      previewDiv.style.left = "50%";
+      previewDiv.style.transform = "translate(-50%, -50%)";
+      previewDiv.style.background = "white";
+      previewDiv.style.padding = "15px";
+      previewDiv.style.borderRadius = "12px";
+      previewDiv.style.boxShadow = "0 8px 20px rgba(0,0,0,0.3)";
+      previewDiv.style.zIndex = "1000";
+      previewDiv.appendChild(video);
+      previewDiv.appendChild(captureBtn);
+
+      document.body.appendChild(previewDiv);
+
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          cameraStream = stream;
+          video.srcObject = stream;
+        })
+        .catch(err => {
+          alert("Camera access denied!");
+          document.body.removeChild(previewDiv);
+        });
+
+      captureBtn.onclick = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const img = document.createElement("img");
+        img.src = canvas.toDataURL("image/png");
+        img.style.maxWidth = "100%";
+        img.style.borderRadius = "10px";
+
+        addMessage(img, "user-message");
+
+        setTimeout(() => {
+          addMessage(translations[languageSelect.value].default, "bot-message");
+        }, 500);
+
+        cameraStream.getTracks().forEach(track => track.stop());
+        document.body.removeChild(previewDiv);
+      };
+    }
+
+    userInput.addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
