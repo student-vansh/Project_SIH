@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crop Insurance</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body { font-family: sans-serif; background: #f0f4f8; margin:0; padding:0; }
+
+/* Autocomplete */
+.autocomplete-suggestions {
+  border: 1px solid #ddd;
+  max-height: 150px;
+  overflow-y: auto;
+  background: #fff;
+  position: absolute;
+  z-index: 50;
+  width: 100%;
+  border-radius: 0.5rem;
+}
+.autocomplete-suggestion {
+  padding: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.autocomplete-suggestion:hover { background: #f0f0f0; }
+
+/* Card animation */
+@keyframes fadeInUp {
+  0% {opacity:0; transform: translateY(20px) scale(0.95);}
+  100% {opacity:1; transform: translateY(0) scale(1);}
+}
+.card-animate { animation: fadeInUp 0.5s ease-out forwards; }
+
+/* Card hover */
+.card-hover {
+  transition: transform 0.5s ease, box-shadow 0.5s ease, background 0.5s ease, filter 0.5s ease;
+  background-size: 200% 200%;
+  position: relative;
+  border-radius: 0.5rem;
+}
+.card-hover:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+  filter: brightness(0.95);
+}
+.card-hover::after {
+  content: '';
+  position: absolute;
+  top:0; left:0; width:100%; height:100%;
+  background: rgba(255,255,255,0.1);
+  opacity:0;
+  transition: opacity 0.4s;
+  border-radius: 0.5rem;
+}
+.card-hover:hover::after { opacity:1; }
+
+/* Button hover & click animation */
+.btn-hover {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.btn-hover:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+}
+.btn-hover:active {
+  transform: scale(0.95);
+  opacity:0.85;
+}
+
+/* Input focus */
+input:focus, select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80,0.3);
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+}
+</style>
+</head>
+<body>
+<div class="max-w-6xl mx-auto p-4 md:p-6">
+
+  <!-- Header + Language toggle -->
+  <div class="flex flex-col md:flex-row justify-between mb-4 items-center gap-3">
+    <h1 id="title" class="text-3xl font-bold text-green-700 animate-fadeInUp text-center md:text-left">🌱 Crop Insurance Policies</h1>
+    <button id="langToggle" class="px-4 py-2 bg-gray-700 text-white rounded-lg btn-hover" onclick="toggleLanguage()">हिंदी / EN</button>
+  </div>
+
+  <!-- BIG PMFBY button -->
+  <div class="mb-6">
+    <button onclick="window.open('https://pmfby.gov.in','_blank')" class="w-full md:w-1/3 block text-center px-4 py-3 bg-green-600 text-white rounded-lg font-bold text-lg btn-hover hover:bg-green-700">
+      Official PMFBY Site
+    </button>
+  </div>
+
+  <!-- Search -->
+  <div class="mb-6 relative flex flex-col md:flex-row gap-2">
+    <input type="text" id="stateSearch" placeholder="Type your State/UT..." class="border p-2 rounded w-full md:w-1/3" onkeyup="showAutocomplete()">
+    <select id="stateDropdown" class="border p-2 rounded w-full md:w-1/3" onchange="syncDropdown()">
+      <option value="">Select Your State/UT</option>
+      <option value="All">All States</option>
+      <option value="Andhra Pradesh">Andhra Pradesh</option>
+      <option value="Assam">Assam</option>
+      <option value="Bihar">Bihar</option>
+      <option value="Chhattisgarh">Chhattisgarh</option>
+      <option value="Goa">Goa</option>
+      <option value="Gujarat">Gujarat</option>
+      <option value="Haryana">Haryana</option>
+      <option value="Himachal Pradesh">Himachal Pradesh</option>
+      <option value="Jharkhand">Jharkhand</option>
+      <option value="Karnataka">Karnataka</option>
+      <option value="Kerala">Kerala</option>
+      <option value="Madhya Pradesh">Madhya Pradesh</option>
+      <option value="Maharashtra">Maharashtra</option>
+      <option value="Punjab">Punjab</option>
+      <option value="Rajasthan">Rajasthan</option>
+      <option value="Tamil Nadu">Tamil Nadu</option>
+      <option value="Telangana">Telangana</option>
+      <option value="Uttar Pradesh">Uttar Pradesh</option>
+      <option value="Uttarakhand">Uttarakhand</option>
+      <option value="West Bengal">West Bengal</option>
+    </select>
+    <div id="autocomplete-list" class="autocomplete-suggestions"></div>
+  </div>
+
+  <!-- Cards -->
+  <div id="insuranceContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+</div>
+
+<script>
+// Center schemes
+const centerCards = [
+  {en:"Pradhan Mantri Fasal Bima Yojana (PMFBY)", hi:"प्रधान मंत्री फसल बीमा योजना (PMFBY)", url:"https://pmfby.gov.in"},
+  {en:"Weather Based Crop Insurance Scheme (RWBCIS)", hi:"मौसम आधारित फसल बीमा योजना (RWBCIS)", url:"https://pmfby.gov.in"}
+];
+
+// State schemes
+const stateCards = [
+  {state:"Andhra Pradesh", en:"Andhra Pradesh State Crop Insurance", hi:"आंध्र प्रदेश राज्य फसल बीमा", url:"https://agri.ap.gov.in"},
+  {state:"Assam", en:"Assam State Crop Insurance", hi:"असम राज्य फसल बीमा", url:"https://assam.gov.in"},
+  {state:"Bihar", en:"Bihar State Crop Insurance", hi:"बिहार राज्य फसल बीमा", url:"https://agri.bih.nic.in"},
+  {state:"Chhattisgarh", en:"Chhattisgarh State Crop Insurance", hi:"छत्तीसगढ़ राज्य फसल बीमा", url:"https://cg.nic.in"},
+  {state:"Goa", en:"Goa State Crop Insurance", hi:"गोवा राज्य फसल बीमा", url:"https://goa.gov.in"},
+  {state:"Gujarat", en:"Gujarat State Crop Insurance", hi:"गुजरात राज्य फसल बीमा", url:"https://gujarat.gov.in"},
+  {state:"Haryana", en:"Haryana State Crop Insurance", hi:"हरियाणा राज्य फसल बीमा", url:"https://haryana.gov.in"},
+  {state:"Himachal Pradesh", en:"Himachal Pradesh State Crop Insurance", hi:"हिमाचल प्रदेश राज्य फसल बीमा", url:"https://himachal.nic.in"},
+  {state:"Jharkhand", en:"Jharkhand State Crop Insurance", hi:"झारखंड राज्य फसल बीमा", url:"https://jharkhand.gov.in"},
+  {state:"Karnataka", en:"Karnataka State Crop Insurance", hi:"कर्नाटक राज्य फसल बीमा", url:"https://aranya.karnataka.gov.in"},
+  {state:"Kerala", en:"Kerala State Crop Insurance", hi:"केरल राज्य फसल बीमा", url:"https://kerala.gov.in"},
+  {state:"Madhya Pradesh", en:"Madhya Pradesh State Crop Insurance", hi:"मध्य प्रदेश राज्य फसल बीमा", url:"https://mp.gov.in"},
+  {state:"Maharashtra", en:"Maharashtra State Crop Insurance", hi:"महाराष्ट्र राज्य फसल बीमा", url:"https://agricoop.maharashtra.gov.in"},
+  {state:"Punjab", en:"Punjab State Crop Insurance", hi:"पंजाब राज्य फसल बीमा", url:"https://punjab.gov.in"},
+  {state:"Rajasthan", en:"Rajasthan State Crop Insurance", hi:"राजस्थान राज्य फसल बीमा", url:"https://rajasthan.gov.in"},
+  {state:"Tamil Nadu", en:"Tamil Nadu State Crop Insurance", hi:"तमिलनाडु राज्य फसल बीमा", url:"https://tn.gov.in"},
+  {state:"Telangana", en:"Telangana State Crop Insurance", hi:"तेलंगाना राज्य फसल बीमा", url:"https://telangana.gov.in"},
+  {state:"Uttar Pradesh", en:"Uttar Pradesh State Crop Insurance", hi:"उत्तर प्रदेश राज्य फसल बीमा", url:"https://up.gov.in"},
+  {state:"Uttarakhand", en:"Uttarakhand State Crop Insurance", hi:"उत्तराखंड राज्य फसल बीमा", url:"https://uk.gov.in"},
+  {state:"West Bengal", en:"West Bengal State Crop Insurance", hi:"पश्चिम बंगाल राज्य फसल बीमा", url:"https://wb.gov.in"}
+];
+
+// Create cards
+const container=document.getElementById("insuranceContainer");
+function createCard(title,en,hi,url,type,index){
+  const div=document.createElement("div");
+  div.className="p-4 card-animate card-hover";
+  div.style.animationDelay=`${index*0.1}s`;
+  div.setAttribute("data-en",en);
+  div.setAttribute("data-hi",hi);
+  div.setAttribute("data-type",type);
+  div.setAttribute("data-states",type==="center"?"All":title);
+  div.innerHTML = `
+    <h3 class="font-bold text-lg mb-2 flex items-center gap-2">
+      <span class="icon-pulse">${type==="center"?"🏛":"🏢"}</span>
+      <span class="card-title">${en}</span>
+    </h3>
+    <p class="text-sm text-gray-50 mb-3 card-desc" style="color:${type==="center"?"#e6ffed":"#ebf8ff"}">
+      ${type==="center"?"Center Government Scheme":"State-specific Scheme"}
+    </p>
+    <div class="flex justify-center md:justify-end mt-4">
+      <button onclick="window.open('${url}','_blank')" class="px-4 py-2 rounded-lg btn-hover text-white w-full md:w-auto text-center" style="background:${type==="center"?"#38a169":"#3182ce"}">
+        Visit Website
+      </button>
+    </div>`;
+  div.style.background = type==="center"?"linear-gradient(to right, #9ae6b4, #38a169)":"linear-gradient(to right, #90cdf4, #3182ce)";
+  div.style.borderRadius = "0.5rem";
+  container.appendChild(div);
+}
+
+// Populate cards
+centerCards.forEach((c,i)=>createCard("All",c.en,c.hi,c.url,"center",i));
+stateCards.forEach((s,i)=>createCard(s.state,s.en,s.hi,s.url,"state",i+centerCards.length));
+
+// Language toggle
+let currentLang='en';
+function toggleLanguage(){
+  currentLang=currentLang==='en'?'hi':'en';
+  document.querySelectorAll('.card-title').forEach(card=>{
+    const parent=card.parentElement.parentElement;
+    card.textContent=parent.getAttribute('data-'+currentLang);
+  });
+  document.querySelectorAll('.card-desc').forEach(desc=>{
+    const parent=desc.parentElement;
+    const type=parent.getAttribute('data-type');
+    desc.textContent=currentLang==='hi'? (type==='center'?'केंद्र सरकार योजना':'राज्य-विशिष्ट योजना') : (type==='center'?'Center Government Scheme':'State-specific Scheme');
+  });
+}
+
+// Autocomplete & filtering
+const statesList=stateCards.map(s=>s.state);
+function showAutocomplete(){
+  const input=document.getElementById('stateSearch');
+  const val=input.value.toLowerCase();
+  const list=document.getElementById('autocomplete-list');
+  list.innerHTML='';
+  if(!val) return;
+  statesList.filter(s=>s.toLowerCase().includes(val)).forEach(state=>{
+    const div=document.createElement('div');
+    div.className='autocomplete-suggestion';
+    div.textContent=state;
+    div.onclick=()=>{input.value=state;document.getElementById('stateDropdown').value=state;list.innerHTML='';filterCards();};
+    list.appendChild(div);
+  });
+  filterCards();
+}
+function syncDropdown(){
+  const val=document.getElementById('stateDropdown').value;
+  document.getElementById('stateSearch').value = val==="All"?"":val;
+  filterCards();
+}
+function filterCards(){
+  const input=document.getElementById('stateSearch').value.toLowerCase();
+  const dropdown=document.getElementById('stateDropdown').value;
+  const selectedState=dropdown||input;
+  const cards=document.querySelectorAll('#insuranceContainer > div');
+  cards.forEach(card=>{
+    const statesAttr=card.getAttribute('data-states').toLowerCase().split(',');
+    if(!selectedState || selectedState.toLowerCase()==='all' || statesAttr.includes(selectedState.toLowerCase()) || statesAttr.includes('all')){
+      card.style.display='block';
+    }else{ card.style.display='none'; }
+  });
+}
+</script>
+</body>
+</html>
+</body>
+</html>
