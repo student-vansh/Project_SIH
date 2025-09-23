@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Harvest Hacker — Marketplace</title>
+  <link rel="stylesheet" href="marketinvs.css">
+</head>
+<body>
+  <div class="container">
+    <header class="top" role="banner">
+      <div class="brand">
+        <div class="logo">HH</div>
+        <div>
+          <h1 data-i18n="brand_title">Harvest Hacker</h1>
+          <p class="small muted" data-i18n="brand_sub">Marketplace — Buy & Sell Farm Resources</p>
+        </div>
+      </div>
+
+      <div class="controls" role="navigation" aria-label="Main controls">
+        <div class="modeToggle" title="">
+          <button id="buyTab" class="tab active" data-i18n="tab_buy">Buy</button>
+          <button id="sellTab" class="tab" data-i18n="tab_sell">Sell</button>
+        </div>
+
+        <div class="search" style="min-width:280px">
+          <input id="searchInput" type="search" placeholder="" aria-label="Search products" data-i18n-placeholder="ph_search">
+          <button id="searchBtn" class="btn primary" title="Search" data-i18n="btn_search">Search</button>
+        </div>
+
+        <select id="langSelect" aria-label="Language selector" class="langSelect">
+          <option value="en">English</option>
+          <option value="hi">हिन्दी</option>
+        </select>
+
+        <button id="openCartBtn" class="btn ghost" title="Open Cart" data-i18n="btn_cart">Cart (<span id="cartCount">0</span>)</button>
+      </div>
+    </header>
+
+    <!-- BUY view -->
+    <div id="buyView">
+      <div class="filters" role="region" aria-label="Filters">
+        <div class="chips" id="categoryChips" aria-hidden></div>
+        <div style="flex:1"></div>
+        <div class="selects">
+          <select id="sortSelect" aria-label="Sort products">
+            <option value="relevance" data-i18n="sort_relevance">Sort: Relevance</option>
+            <option value="price_asc" data-i18n="sort_low">Price: Low → High</option>
+            <option value="price_desc" data-i18n="sort_high">Price: High → Low</option>
+          </select>
+          <select id="locationSelect" aria-label="Location filter">
+            <option value="any" data-i18n="loc_any">Location: Any</option>
+            <option value="nearby" data-i18n="loc_near">Within 50 km</option>
+          </select>
+        </div>
+      </div>
+
+      <main>
+        <section id="productGrid" class="grid" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <!-- SELL view -->
+    <div id="sellView" style="display:none">
+      <section class="sellForm">
+        <h2 data-i18n="sell_heading">Sell an item</h2>
+        <div class="form-row">
+          <input id="sellTitle" placeholder="" data-i18n-placeholder="ph_sell_title">
+          <select id="sellCategory">
+            <option>Seeds</option><option>Fertilizers</option><option>Machinery</option><option>Produce</option><option>Agrochemicals</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <input id="sellPrice" placeholder="" type="number" data-i18n-placeholder="ph_sell_price"/>
+          <input id="sellUnit" placeholder="" data-i18n-placeholder="ph_sell_unit"/>
+        </div>
+        <div class="form-row">
+          <input id="sellQty" placeholder="" type="number" data-i18n-placeholder="ph_sell_qty"/>
+          <input id="sellCity" placeholder="" data-i18n-placeholder="ph_sell_city"/>
+        </div>
+        <div style="margin-top:8px">
+          <textarea id="sellDesc" rows="3" placeholder="" data-i18n-placeholder="ph_sell_desc"></textarea>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <input id="sellImage" type="file" accept="image/*" />
+          <button id="addListing" class="btn primary" data-i18n="btn_add">Add listing</button>
+        </div>
+        <div class="small muted" style="margin-top:8px" data-i18n="sell_note">Your listing will appear in the Buy tab (stored locally).</div>
+      </section>
+    </div>
+
+  </div>
+
+  <!-- Cart Panel -->
+  <aside id="cartPanel" class="cart-floating" role="dialog" aria-hidden="true">
+    <header>
+      <div>
+        <strong data-i18n="cart_title">Your Cart</strong><div class="small muted" data-i18n="cart_sub">Items added</div>
+      </div>
+      <div>
+        <button id="closeCartBtn" class="btn ghost" data-i18n="btn_close">Close</button>
+      </div>
+    </header>
+    <div id="cartItems"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+      <div>
+        <div class="small muted" data-i18n="cart_total">Total</div>
+        <div id="cartTotal" class="priceSmall">₹0</div>
+      </div>
+      <div style="width:140px">
+        <button id="checkoutBtn" class="btn primary" style="width:100%" disabled data-i18n="btn_checkout">Checkout</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Product Modal -->
+  <div id="modal" class="modal" role="dialog" aria-hidden="true" aria-modal="true">
+    <div class="panel" role="document">
+      <button class="closeBtn" id="modalClose" aria-label="Close">×</button>
+      <div id="modalGallery" class="gallery" aria-hidden="true"></div>
+      <div class="details">
+        <h2 id="modalTitle">Product Title</h2>
+        <div id="modalPrice" class="priceSmall">₹0</div>
+        <div id="modalMeta" class="small muted">Seller • Location</div>
+        <p id="modalDesc" style="margin-top:10px;color:#123;"></p>
+
+        <div style="margin-top:auto;display:flex;gap:8px">
+          <button id="modalAddBtn" class="btn primary" data-i18n="btn_addcart">Add to cart</button>
+          <button id="modalBuyBtn" class="btn ghost" data-i18n="btn_buynow">Buy now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal (single-product or cart) -->
+  <div id="checkout" class="checkout" role="dialog" aria-hidden="true" aria-modal="true">
+    <div class="box">
+      <button class="closeBtn" id="checkoutClose" aria-label="Close">×</button>
+      <h3 id="checkoutTitle">Checkout</h3>
+      <div id="checkoutItems" style="margin-top:8px"></div>
+
+      <div style="margin-top:12px">
+        <label class="small" data-i18n="lbl_name">Name</label>
+        <input id="buyerName" type="text" placeholder="" data-i18n-placeholder="ph_name" />
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <div style="flex:1">
+          <label class="small" data-i18n="lbl_phone">Phone</label>
+          <input id="buyerPhone" type="text" placeholder="" data-i18n-placeholder="ph_phone" />
+        </div>
+        <div style="flex:1">
+          <label class="small" data-i18n="lbl_payment">Payment</label>
+          <select id="paymentMethod">
+            <option value="cod" data-i18n="pay_cod">Cash on Delivery</option>
+            <option value="upi" data-i18n="pay_upi">UPI (mock)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <div style="flex:1">
+          <label class="small" data-i18n="lbl_state">State</label>
+          <input id="buyerState" placeholder="" data-i18n-placeholder="ph_state" />
+        </div>
+        <div style="flex:1">
+          <label class="small" data-i18n="lbl_city">City</label>
+          <input id="buyerCity" placeholder="" data-i18n-placeholder="ph_city" />
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <div style="flex:1">
+          <label class="small" data-i18n="lbl_pincode">Pincode</label>
+          <input id="buyerPincode" placeholder="" data-i18n-placeholder="ph_pincode" />
+        </div>
+        <div style="flex:1">
+          <label class="small" data-i18n="lbl_address">Address</label>
+          <input id="buyerAddress" placeholder="" data-i18n-placeholder="ph_address" />
+        </div>
+      </div>
+
+      <div id="upiBlock" style="display:none;margin-top:8px">
+        <label class="small" data-i18n="lbl_upi">UPI ID</label>
+        <input id="buyerUpi" placeholder="" data-i18n-placeholder="ph_upi" />
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <input id="upiQr" type="file" accept="image/*" />
+          <div class="small muted" data-i18n="upi_note">(Optional: upload UPI QR image)</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+        <button id="cancelCheckout" class="btn ghost" data-i18n="btn_cancel">Cancel</button>
+        <button id="confirmCheckout" class="btn primary" data-i18n="btn_confirm">Confirm & Pay</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="marketinvs.js"></script>
+</body>
+</html>
